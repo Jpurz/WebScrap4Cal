@@ -1,0 +1,114 @@
+Sub CalendarUpdate()
+
+Call filterArtist
+
+Call GetDates
+
+End Sub
+
+Sub filterArtist()
+
+Dim objIE As InternetExplorer
+Dim ele As Object
+Dim y As Integer
+Dim x As Integer
+Dim fixedDate As String
+ 
+ Set objIE = New InternetExplorer
+ objIE.Visible = False
+ 
+ url = "https://....."
+ 
+ objIE.Navigate url
+   
+  Do While objIE.ReadyState <> 4: DoEvents:
+  Loop
+ 
+x = 2
+
+For Each ele In objIE.Document.getElementsByClassName("event-card-content")
+strContent = Replace(ele.textContent, Chr(10), "")
+strLeft = Left(LTrim(strContent), 30)
+
+  Sheets("CalendarUpdate").Range("A" & x).Value = strLeft
+  x = x + 1
+  
+Next
+
+objIE.Quit
+
+End Sub
+
+Sub GetDates()
+
+'Dim stringOne As String
+'Dim regexOne As Object
+'Dim regexOneDay As Object
+'Dim theMatches As Object
+'Dim Match As Object
+Dim objIE As InternetExplorer
+Dim ele As Object
+Dim y As Integer
+Dim x As Integer
+Dim fixedDate As String
+ 
+ Set objIE = New InternetExplorer
+ objIE.Visible = False
+ 
+ url = "https://..."
+ 
+ objIE.Navigate url
+   
+  Do While objIE.ReadyState <> 4: DoEvents:
+  Loop
+
+Set regexOne = New RegExp
+Set regexOneDay = New RegExp
+Set regexOneYear = New RegExp
+
+regexOne.pattern = "([A-Z][a-z]{2,})"   'gets the month
+regexOneDay.pattern = "(0[1-9]|[12][0-9]|3[01])"   'gets the day
+regexOneYear.pattern = "(\d{4})"     'gets the year
+
+regexOne.Global = True
+regexOneDay.Global = False
+regexOneYear.Global = True
+
+y = 2
+
+For Each ele In objIE.Document.getElementsByClassName("event-card-content")
+
+strContent = Replace(ele.textContent, Chr(10), "")
+strDate = Mid(strContent, 125, 70)
+fixedDate = Replace(strDate, " ", "")
+
+    Set theMatches = regexOne.Execute(fixedDate)
+    For Each Match In theMatches
+      Monthx = Match.Value
+      'MsgBox x
+    Next
+
+    Set theMatches = regexOneDay.Execute(fixedDate)
+    For Each Match In theMatches
+      Dayx = Match.Value
+      'MsgBox x
+    Next
+    
+    
+    Set theMatches = regexOneYear.Execute(fixedDate)
+    For Each Match In theMatches
+      YearX = Match.Value
+      'MsgBox x
+    Next
+
+  parsedDate = Monthx & " " & Dayx & ", " & YearX
+
+  Sheets("CalendarUpdate").Range("AA" & y).Value = parsedDate
+  y = y + 1
+Next
+
+'MsgBox parsedDate
+
+objIE.Quit
+End Sub
+
